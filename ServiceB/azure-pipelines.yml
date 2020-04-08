@@ -1,0 +1,98 @@
+name: 0.1.$(Build.BuildId) 
+trigger:
+  batch: true
+  branches:
+    include:
+    - development
+    - master
+  paths:
+    include:
+    - /ServiceB/*
+pool:
+  vmImage: 'ubuntu-16.04'
+variables:
+  NodeJSVer: '10.16.3'
+  ApiGateway_Srv_Name: 'ServiceB'
+  ApiGateway_Src_Path: 'ServiceB'
+  Archive_Src_Folder: 'dist_archive'
+steps:
+- task: CIODevOps.http-security-headers-build-release-task.custom-build-release-task.CheckHTTPSecurityHeader@1
+  displayName: 'CheckHTTPSecurityHeader' 
+  enabled: false
+    
+- task: NodeTool@0
+  displayName: 'Use Node $(NodeJSVer)'
+  inputs:
+    versionSpec: $(NodeJSVer)
+    
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    verbose: false
+    workingDir: $(ApiGateway_Src_Path)
+  enabled: true
+
+- task: Npm@1
+  displayName: 'Run Test'
+  inputs:
+    command: custom
+    verbose: true
+    customCommand: 'run test'
+    workingDir: $(ApiGateway_Src_Path)
+  enabled: false
+
+- task: Npm@1
+  displayName: 'npm package'
+  inputs:
+    command: custom
+    verbose: false
+    customCommand: 'run bundle '
+    workingDir: $(ApiGateway_Src_Path)
+  enabled: false
+
+- bash: |
+   rm -rf ./node_modules
+  displayName: 'Clean before archive and push'
+  workingDirectory: $(ApiGateway_Src_Path)
+  enabled: true
+
+- bash: |
+   ls -ail && pwd
+  displayName: 'Debug'
+  workingDirectory: $(ApiGateway_Src_Path)
+  enabled: true
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/.test_output/coverage/cobertura-coverage.xml'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/.test_output/coverage/cobertura-coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/.test_output/coverage'
+    failIfCoverageEmpty: true
+  enabled: false
+
+- bash: 'ls -ail && pwd && mkdir $(Archive_Src_Folder)'
+  displayName: 'Create distribution folder'
+  workingDirectory: $(ApiGateway_Src_Path)
+  enabled: true
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: distribution folder'
+  inputs:
+    SourceFolder: $(ApiGateway_Src_Path)
+    TargetFolder: '$(Archive_Src_Folder)'
+  enabled: true
+
+- task: ArchiveFiles@2
+  displayName: 'Package source'
+  inputs:
+    rootFolderOrFile: '$(Archive_Src_Folder)'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/api-gateway-$(ApiGateway_Srv_Name)-$(build.buildnumber).zip'
+  enabled: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: release'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/api-gateway-$(ApiGateway_Srv_Name)-$(build.buildnumber).zip'
+    ArtifactName: release
+  enabled: true

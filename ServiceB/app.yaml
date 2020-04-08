@@ -1,0 +1,12 @@
+runtime: nodejs10
+service: serviceB
+instance_class: F4_HIGHMEM
+
+env_variables:
+  NODE_ENV: production
+  PROJECT_URL: [PROJECT_URL]
+  PORT: [PORT]
+  IDENTITY_METADATA: [IDENTITY_METADATA]
+  CLIENT_ID: [CLIENT_ID]
+  AUD: [AUD]
+

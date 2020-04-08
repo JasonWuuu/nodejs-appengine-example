@@ -1,0 +1,14 @@
+# IDE
+.vs
+.vscode
+.idea
+
+# test
+.nyc_output
+coverage
+
+# node
+node_modules
+
+# GCP dev credential file
+sa-npd-27354-oriondev-95184682-42b68c284938.json
