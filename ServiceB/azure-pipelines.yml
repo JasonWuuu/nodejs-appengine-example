@@ -16,7 +16,7 @@ variables:
   ApiGateway_Src_Path: 'ServiceB'
   Archive_Src_Folder: 'dist_archive'
 steps:
-- task: CIODevOps.http-security-headers-build-release-task.custom-build-release-task.CheckHTTPSecurityHeader@1
+- task: DevOps.http-security-headers-build-release-task.custom-build-release-task.CheckHTTPSecurityHeader@1
   displayName: 'CheckHTTPSecurityHeader' 
   enabled: false
     
