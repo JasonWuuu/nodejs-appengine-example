@@ -16,7 +16,7 @@
     "passport": "^0.4.1",
     "passport-azure-ad": "^4.2.1",
     "passport-azure-ad-oauth2": "0.0.4",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "morgan": "^1.9.1"
   }
 }
